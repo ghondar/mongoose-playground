@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "mongodb-memory-server": "^6.0.2",
-    "mongoose": "^5.7.13"
+    "mongodb-memory-server": "6.7.5",
+    "mongoose": "5.9.16"
   }
 }

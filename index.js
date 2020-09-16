@@ -4,18 +4,6 @@ const { Schema, ObjectId, model } = mongoose;
 
 (async () => {
   // Edit your test here, Example:
-  const MixedSchema = new Schema({
-    mixedArray: [{
-      data: {
-        type: ObjectId,
-        refPath: 'mixedArray.kind',
-      },
-      kind: {
-        type: String,
-        enum: ['a', 'b'],
-      }
-    }],
-  });
 
   const ASchema = new Schema({
     a: {
@@ -24,44 +12,42 @@ const { Schema, ObjectId, model } = mongoose;
   });
 
   const BSchema = new Schema({
-    b: {
-      type: String,
-    },
+    b: { type: String },
+    aId: { ref: "a", type: ObjectId },
   });
 
-  const Mixed = model("mix", MixedSchema);
   const A = model("a", ASchema);
   const B = model("b", BSchema);
 
   const data_a = await A.create({
     a: 'hello',
   });
-  const data_b = await B.create({
-    b: 'world',
-  });
+  const data_b = await B.create([
+    {
+      b: 'world',
+      aId: mongoose.Types.ObjectId("5f623c7cbda21b00c15e4097")
+    },
+    {
+      b: 'otro',
+      aId: mongoose.Types.ObjectId("5f623c7cbda21b00c15e4097")
+    }
+  ]);
+  
 
-  const data_mix = await Mixed.create({
-    mixedArray: [
-      {
-        kind: 'a',
-        data: data_a._id,
-      }, {
-        kind: 'b',
-        data: data_b._id,
-      },
-    ]
-  });
-
-  const query = Mixed
-    .findById(data_mix._id)
-    .populate({
-      path: 'mixedArray.data',
-      options: { lean: true },
+  const query = B
+    .findOneAndUpdate({
+      b: "otro",
+    }, {
+      $set: {
+        aId: "5f623c7cbda21b00c15e4098"
+      }
+    }, {
+      'new': true
     })
     .lean();
 
   const result = await query.exec();
-  console.log(result.mixedArray);
+  console.log(result);
 })().then(
   async _ => {
     await mongoose.disconnect();
